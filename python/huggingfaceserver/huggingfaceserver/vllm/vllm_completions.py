@@ -360,7 +360,7 @@ class OpenAIServingCompletion:
         self,
         messages: Iterable[ChatCompletionRequestMessage],
         chat_template: Optional[str] = None,
-        tools: Optional[list[ChatCompletionTool]] = None,
+        tools: Optional[List[ChatCompletionTool]] = None,
     ):
         return self.tokenizer.apply_chat_template(
             conversation=messages,

@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from abc import abstractmethod
-from typing import AsyncIterator, Iterable, Union, cast, Optional
+from typing import AsyncIterator, Iterable, Union, cast, Optional, List
 
 from kserve.protocol.rest.openai.types import (
     ChatCompletion,
@@ -32,6 +32,8 @@ from kserve.protocol.rest.openai.types import (
     Logprobs,
     TopLogprob,
 )
+
+from kserve.protocol.rest.openai.types.openapi import ChatCompletionTool
 
 from ....errors import InvalidInput
 from .openai_model import (
@@ -56,6 +58,7 @@ class OpenAIChatAdapterModel(OpenAIModel):
         self,
         messages: Iterable[ChatCompletionRequestMessage],
         chat_template: Optional[str] = None,
+        tools: Optional[List[ChatCompletionTool]] = None,
     ) -> ChatPrompt:
         """
         Given a list of chat completion messages, convert them to a prompt.
