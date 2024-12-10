@@ -88,7 +88,7 @@ class DummyModel(OpenAIChatAdapterModel):
         self,
         messages: Iterable[ChatCompletionRequestMessage],
         chat_template: Optional[str] = None,
-        tools: Optional[list[ChatCompletionTool]] = None,
+        tools: Optional[List[ChatCompletionTool]] = None,
     ) -> ChatPrompt:
         return ChatPrompt(prompt="hello")
 
