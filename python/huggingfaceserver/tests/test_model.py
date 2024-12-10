@@ -388,6 +388,9 @@ async def test_bloom_chat_completion(bloom_model: HuggingfaceGenerativeModel):
         messages=messages,
         stream=False,
         max_tokens=20,
+        chat_template="{% for message in messages %}"
+        "{{ message.content }}{{ eos_token }}"
+        "{% endfor %}",
     )
     request = ChatCompletionRequest(params=params, context={})
     response = await bloom_model.create_chat_completion(request)
@@ -415,6 +418,9 @@ async def test_bloom_chat_completion_streaming(bloom_model: HuggingfaceGenerativ
         messages=messages,
         stream=True,
         max_tokens=20,
+        chat_template="{% for message in messages %}"
+        "{{ message.content }}{{ eos_token }}"
+        "{% endfor %}",
     )
     request = ChatCompletionRequest(params=params, context={})
     response = await bloom_model.create_chat_completion(request)
@@ -497,6 +503,60 @@ async def test_input_padding_with_pad_token_not_specified(
     response = await openai_gpt_model.create_completion(request)
     assert (
         response.choices[0].text
-        == "west, and the sun sets in the west. \n the sun rises in the"
+        == "west , and the sun sets in the west . \n the sun rises in the"
     )
-    assert "a member of the royal family." in response.choices[1].text
+    assert "a member of the royal family ." in response.choices[1].text
+
+
+@pytest.mark.asyncio
+async def test_tools_chat_completion(bloom_model: HuggingfaceGenerativeModel):
+    messages = [
+        {
+            "role": "system",
+            "content": "You are a friendly chatbot whose purpose is to tell me what the weather is.",
+        },
+        {
+            "role": "user",
+            "content": "weather in Ithaca, NY",
+        },
+    ]
+
+    tools = [
+        {
+            "type": "function",
+            "function": {
+                "name": "get_current_weather",
+                "description": "Get the current weather",
+                "parameters": {
+                    "type": "dict",
+                    "properties": {
+                        "location": {
+                            "type": "string",
+                            "description": "The city and state, e.g. San Francisco, CA",
+                        },
+                        "format": {
+                            "type": "string",
+                            "enum": ["celsius", "fahrenheit"],
+                            "description": "The temperature unit to use. Infer this from the users location.",
+                        },
+                    },
+                    "required": ["location", "format"],
+                },
+            },
+        }
+    ]
+    params = CreateChatCompletionRequest(
+        model="bloom-560m",
+        messages=messages,
+        stream=False,
+        max_tokens=100,
+        tools=tools,
+        tool_choice="auto",
+        chat_template="{% for message in messages %}"
+        "{{ message.content }} You have these tools: {% for tool in tools %} {{ eos_token }}"
+        "{% endfor %}{% endfor %}",
+    )
+    request = ChatCompletionRequest(params=params, context={})
+    response = await bloom_model.create_chat_completion(request)
+
+    assert response.choices[0].message.content
