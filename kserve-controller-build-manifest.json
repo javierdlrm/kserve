@@ -1,8 +1,6 @@
 [
-    {
-      "name": "hopsworks/kserve-controller",
-      "version": "env:VERSION",
-      "dockerFile": "Dockerfile"
-    }
-  ]
-  
+  {
+    "name": "hopsworks/kserve-controller",
+    "version": "env:VERSION"
+  }
+]
