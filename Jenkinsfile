@@ -11,9 +11,10 @@ properties([
 
 node("local") {
     stage('Clone repository') {
-      if (params.branch == ''){
-        checkout scm
-      } else {
+      // Always clone first: the workspace may be empty on a fresh agent, in which
+      // case the git commands below have no repository to operate on.
+      checkout scm
+      if (params.branch != ''){
         sshagent (credentials: ['id_rsa']) {
           sh """
             git fetch --all
