@@ -8,7 +8,11 @@ license = {text = "Apache-2.0"}
 requires-python = ">=3.10,<3.13"
 dependencies = [
     "uvicorn[standard]<1.0.0,>=0.30.6",
-    "fastapi>=0.115.3,<1.0.0",
+    # <0.137: fastapi 0.137.0 adds _IncludedRouter entries to the router table,
+    # which crashes timing_asgi's StarletteScopeToName on every request
+    # (AttributeError: no attribute 'endpoint'). 0.136.x is also what upstream
+    # release-0.20 locks.
+    "fastapi>=0.115.3,<0.137",
     "starlette>=1.0.1,<2.0.0", # CVE-2026-48710 Starlette: Security restriction bypass via malformed HTTP Host header
     "cloudevents<2.0.0,>=1.6.2",
     "six<2.0.0,>=1.16.0",
@@ -109,8 +113,9 @@ index-url = "https://test.pypi.org/simple/"
 extra-index-url = ["https://pypi.org/simple"]
 index-strategy = "unsafe-best-match"
 # unsafe-best-match can resolve to squatted test.pypi uploads (v100.0.0 etc.);
-# keep this vllm transitive on its real release series.
-constraint-dependencies = ["prometheus-fastapi-instrumentator<100"]
+# keep this vllm transitive on its real release series. 8.x is the fence:
+# 7.x caps starlette<1.0, unresolvable next to the starlette>=1.0.1 floor.
+constraint-dependencies = ["prometheus-fastapi-instrumentator<9"]
 
 [build-system]
 requires = ["setuptools>=61.0"]

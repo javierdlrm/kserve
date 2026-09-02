@@ -55,9 +55,11 @@ ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
 RUN useradd kserve -m -u 1000 -d /home/kserve
 
-# The base image ships pip/setuptools/wheel in the system site-packages;
-# the runtime only uses the venv, but scanners flag the old vendored copies.
-RUN python -m pip install --no-cache-dir --upgrade pip setuptools wheel
+# The base image ships pip/setuptools/wheel in the system site-packages; the
+# runtime only uses the venv (built in the builder stage), so remove them
+# outright. Upgrading instead would keep pip's vendored setuptools/msgpack
+# copies around for scanners to flag.
+RUN python -m pip uninstall -y pip setuptools wheel
 
 # perl-base carries unfixable Criticals (CVE-2026-8376, CVE-2026-13221,
 # CVE-2026-42496) and gzip an unfixable High (CVE-2026-41992); nothing in
